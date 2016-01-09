@@ -8,15 +8,16 @@ const int f = 1;
 const int g = 7;
 const int p = 8;
 //digits
-const int d4 = 12;
-const int d3 = 11;
-const int d2 = 10;
-const int d1 = 9;
+const int d4 = 9;
+const int d3 = 10;
+const int d2 = 11;
+const int d1 = 12;
 
 //other
 int n = 0;
 const int x = 100;
 const int del = 25;
+int photo_state = 0;
 
 void setup()
 {
@@ -33,15 +34,24 @@ void setup()
   pinMode(g, OUTPUT);
   pinMode(p, OUTPUT);
   pinMode(13, INPUT);
+  Serial.begin(9600);
 }
 
 void loop()
 {
   displayNumber(n / x);
-  n++;
 
-  if (digitalRead(13) == HIGH)
+  if (digitalRead(13) == 1)
   {
-    n = 0;
+    if (photo_state == 0) {
+      n++;
+      photo_state = 1;
+    }
+  } else {
+    if (photo_state == 1) {
+      photo_state = 0;
+    }
   }
+
+  Serial.println(n);
 }
