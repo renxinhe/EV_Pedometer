@@ -1,20 +1,23 @@
+int d_time = 5500; // us
+
 void displayNumber(int n)
 {
   clearLEDs();
   pickDigit(1);
   pickNumber((n/1000)%10);
-  
+  delayMicroseconds(d_time);
   clearLEDs();
   pickDigit(2);
   pickNumber((n/100)%10);
-  
+  delayMicroseconds(d_time);
   clearLEDs();
   pickDigit(3);
   pickNumber((n/10)%10);
-  
+  delayMicroseconds(d_time);
   clearLEDs();
   pickDigit(4);
   pickNumber(n%10);
+  delayMicroseconds(d_time);
 }
 
 void pickDigit(int x)
@@ -52,6 +55,18 @@ void pickNumber(int x)
 
 void dispDec(int x)
 {
+  digitalWrite(d1, LOW);
+  digitalWrite(d2, LOW);
+  digitalWrite(d3, LOW);
+  digitalWrite(d4, LOW);
+  
+  switch(x)
+  {
+    case 1: digitalWrite(d1, HIGH); break;
+    case 2: digitalWrite(d2, HIGH); break;
+    case 3: digitalWrite(d3, HIGH); break;
+    default: digitalWrite(d4, HIGH); break;
+  }
   digitalWrite(p, LOW);
 }
 
@@ -171,7 +186,7 @@ void nine()
   digitalWrite(a, LOW);
   digitalWrite(b, LOW);
   digitalWrite(c, LOW);
-  digitalWrite(d, HIGH);
+  digitalWrite(d, LOW);
   digitalWrite(e, HIGH);
   digitalWrite(f, LOW);
   digitalWrite(g, LOW);
