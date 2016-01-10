@@ -1,10 +1,10 @@
 //segments
 const int a = 6;
-const int b = 2;
+const int b = 13;
 const int c = 3;
 const int d = 4;
 const int e = 5;
-const int f = A3; // 1
+const int f = A3;
 const int g = 7;
 const int p = 8;
 //digits
@@ -12,13 +12,17 @@ const int d4 = 12;
 const int d3 = 11;
 const int d2 = 10;
 const int d1 = 9;
+//misc
+const int BUTTON_IN = A0;
+const int RED_LED = A1;
+const int BLUE_LED = A2;
+const int PHOTO_ENCODER_IN = 2;
 
 //other
 const float WHEEL_CIRC = 22.5; // Front wheel circumference in cm.
 const int NUM_GAPS = 20; // Number of gaps/windows on interrupter wheel.
-//const int X = 100;
-const int del = 4500;
-int count = 0; // Number of time the photogate is broken.
+//const int del = 4500;
+volatile int count = 0; // Number of time the photogate is broken.
 int photo_state = 0;
 int zero_hold = 0;
 float dist = 0; // Distance traveled.
@@ -37,17 +41,17 @@ void setup()
   pinMode(f, OUTPUT);
   pinMode(g, OUTPUT);
   pinMode(p, OUTPUT);
-  pinMode(13, INPUT);
-  pinMode(A0, INPUT);
-  pinMode(A1, OUTPUT);
-  pinMode(A2, OUTPUT);
+  pinMode(BUTTON_IN, INPUT);
+  pinMode(RED_LED, OUTPUT);
+  pinMode(BLUE_LED, OUTPUT);
+  pinMode(PHOTO_ENCODER_IN, INPUT);
   Serial.begin(9600);
+  attachInterrupt(digitalPinToInterrupt(PHOTO_ENCODER_IN), debounceInterrupt, RISING);
 }
 
 void loop()
 {
-  noInterrupts();
-  dist = count * (WHEEL_CIRC / NUM_GAPS);
+  dist = (count / 2) * (WHEEL_CIRC / NUM_GAPS);
   dispDec(4);
   
   if (dist >= 50 && dist <= 850) {
@@ -58,24 +62,23 @@ void loop()
   
   if (dist >= 1000) {
     digitalWrite(A1, HIGH);
-    displayNumber((dist - 1000));
   } else {
     digitalWrite(A1, LOW);
-    displayNumber(dist);
   }
+  displayNumber(dist);
   
-  if (digitalRead(13) == 1)
-  {
-    if (photo_state == 0) {
-      count++;
-      photo_state = 1;
-    }
-  } else {
-    if (photo_state == 1) {
-      photo_state = 0;
-    }
-  }
-  
+//  if (digitalRead(13) == 1)
+//  {
+//    if (photo_state == 0) {
+//      count++;
+//      photo_state = 1;
+//    }
+//  } else {
+//    if (photo_state == 1) {
+//      photo_state = 0;
+//    }
+//  }
+
   if (analogRead(A0) == 0)
   {
     digitalWrite(A1, HIGH);
@@ -89,6 +92,25 @@ void loop()
     zero_hold = 0;
   }
   
+  Serial.print("Count= ");
+  Serial.print(count);
+  Serial.print("; ");
   Serial.print(dist);
   Serial.println(" cm");
+}
+
+//Software debouncing in Interrupt, by Delphiño K.M.
+long debouncing_time = 1; //Debouncing Time in Milliseconds
+volatile unsigned long last_micros;
+
+void debounceInterrupt() {
+  if((long)(micros() - last_micros) >= debouncing_time * 1000) {
+    add_count();
+    last_micros = micros();
+  }
+}
+
+void add_count()
+{
+  count++;
 }
